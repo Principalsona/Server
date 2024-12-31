@@ -21,14 +21,13 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Blog Schema and Model
-
-// Project Schema and Model with createdAt field
+// Project Schema and Model with type and createdAt fields
 const projectSchema = new mongoose.Schema({
   title: String,
   description: String,
   author: String,
   imgSrc: String,
+  type: { type: String, required: true }, // New 'type' field
   createdAt: { type: Date, default: Date.now }, // Add createdAt field
 });
 
@@ -51,13 +50,25 @@ app.post("/projects", async (req, res) => {
 // GET route to fetch all projects, sorted by createdAt (newest first)
 app.get("/projects", async (req, res) => {
   try {
-    const projects = await Project.find().sort({ createdAt: -1 }); // Sort by createdAt descending
+    const projects = await Project.find().sort({ createdAt: -1 });
     res.status(200).json(projects);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 });
-  
+
+// GET route to fetch projects by type
+app.get("/projects/:type", async (req, res) => {
+  try {
+    const { type } = req.params;
+    const projects = await Project.find({ type }).sort({ createdAt: -1 });
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch projects by type" });
+  }
+});
+
 const PORT = process.env.PORT || 5545;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
