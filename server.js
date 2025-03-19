@@ -9,7 +9,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // MongoDB connection (use your actual MongoDB URI here)
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/projects";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/projectsDB";
 
 mongoose
   .connect(MONGO_URI, {
@@ -26,7 +26,7 @@ const projectSchema = new mongoose.Schema({
   author: { type: String, required: true },
   imgSrc: { type: String, required: true },
   type: { type: String, required: true },
-  years: { type: String }, // Only used for type4
+  committeeDetails: { type: String }, // Only used for type4
   createdAt: { type: Date, default: Date.now }, // Add createdAt field
 });
 
@@ -35,9 +35,9 @@ const Project = mongoose.model("Project", projectSchema);
 // Routes
 
 // POST route to handle the form submission and add a new project
-app.post("/api/projects", async (req, res) => {
+app.post("/projects", async (req, res) => {
   try {
-    const { title, description, author, imgSrc, type, years } = req.body;
+    const { title, description, author, imgSrc, type, committeeDetails } = req.body;
 
     // Create a new project instance
     const newProject = new Project({
@@ -46,7 +46,7 @@ app.post("/api/projects", async (req, res) => {
       author,
       imgSrc,
       type,
-      years, // This will be undefined if not provided (e.g., for non-type4)
+      committeeDetails, // This will be undefined if not provided (e.g., for non-type4)
     });
 
     // Save the project to the database
@@ -61,7 +61,7 @@ app.post("/api/projects", async (req, res) => {
 });
 
 // GET route to fetch all projects, sorted by createdAt (newest first)
-app.get("/api/projects", async (req, res) => {
+app.get("/projects", async (req, res) => {
   try {
     const projects = await Project.find().sort({ createdAt: -1 });
     res.status(200).json(projects);
@@ -72,7 +72,7 @@ app.get("/api/projects", async (req, res) => {
 });
 
 // GET route to fetch projects by type
-app.get("/api/projects/:type", async (req, res) => {
+app.get("/projects/:type", async (req, res) => {
   try {
     const { type } = req.params;
     const projects = await Project.find({ type }).sort({ createdAt: -1 });
